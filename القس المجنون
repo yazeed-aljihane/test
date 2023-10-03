@@ -1,0 +1,98 @@
+<html>
+
+<body bgcolor= "coral">
+<div align="right">
+<form action="projict.php" method="post" enctype="multipart/form-data">
+<label> :عنوان المشكله </label>
+<br><br>
+<input type="text" placeholder="عنوان المشكلة" name="co_name">
+<br><br>
+<label>:نوع المشكله</label>
+<br><br>
+<input type="radio" name="co_type" value="مبنى">
+<label>مبني</label>
+<input type="radio" name="co_type" value="طرق وشوارع" >
+<label>أناره</label>
+<input type="radio" name="co_type" value="أناره" >
+<label>طرق وشوارع</label>
+<br><br>
+<label>place:</label>
+<select name="co_place">
+<option value="ظهره لبن">ظهره لبن</option>
+<option value="	حي الربيع">	حي الربيع</option>
+<option value="حي الندى">       حي الندى   </option>
+<option value="حي الصحافة">   حي الصحافة</option>
+<option value="   حي النرجس">       حي النرجس</option>
+<option value="	حي الملز">    	حي الملز  </option>
+</select>
+<br><br>
+<br><br>
+<label>choose picture:</label>
+<br><br>
+<input type="file" name="co_img">
+<br><br>
+<input type="submit" name="submit" >
+    </form>
+
+    <br><br>
+<?php
+if(isset($_POST['submit'])){
+	$img_location = 'image/';
+$file_name=time().'_'.basename($_FILES["co_img"] ["name"]);
+$file_path =$img_location.$file_name;
+move_uploaded_file($_FILES["co_img"]["tmp_name"],$file_path);
+
+ include 'mysql.php';
+$co_name=$_POST['co_name'];
+$co_type=$_POST['co_type'];
+$co_place=$_POST['co_place'];
+
+$sql="insert into complaints (co_name,co_type,co_place,co_img) values('$co_name','$co_type','$co_place','$file_path')";
+if(mysqli_query($conn,$sql)){
+    echo "the complain has sent";
+}else{
+    echo "erorr";
+}
+mysqli_close($conn);
+}
+
+
+?>
+
+
+
+</body>
+</html>
+...............................................
+<?php $conn = mysqli_connect("localhost","root","","complaint");
+if ($conn===false){
+ die("error".mysqli_connect_error());
+}
+?>
+...............................................
+<html>
+
+<body bgcolor= "coral">
+<?php
+
+ include 'mysql.php';
+$sql="select*from complaints ";
+$query = mysqli_query($conn,$sql);
+echo'<table width="50%" bgcolor="beige" border="1" align="center">';
+echo '<tr><th>complain name</th><th>photo</th></tr>';
+while ($row = mysqli_fetch_row($query)){
+	
+	echo'<tr align = "center"><td>'.$row[0].'</td><td><img src="'.$row[3].'" width="50" height="50"> </td></tr>';
+
+}
+echo '</table>'
+
+
+
+
+?>
+
+
+
+</body>
+</html>
