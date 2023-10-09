@@ -1,0 +1,210 @@
+<html>
+
+<body bgcolor= "coral">
+<div align="right">
+<?php
+ $s1=$s2=$s3=$s4=$s5=$s6="";
+if(isset($_POST['submit'])){
+	
+	 if (empty($_POST['co_name'])){
+        $s1 = "يجب ان تدخل العنوان";
+   }
+   if (empty($_POST['co_type'])){
+       $s2 = "يجب ان تدخل نوع المشكلة";
+   }
+   if ($_POST['co_place']=="h"){
+        $s3 = "يجب ادخال الحي";
+   }if (empty($_FILES["co_img"]["name"])){
+        $s4 = "يجب ان تضع صورة";
+   }
+  
+
+   $img_location = 'image/';
+$file_name=time().'_'.basename($_FILES["co_img"] ["name"]);
+$file_path =$img_location.$file_name;
+$img_size=basename($_FILES["co_img"]["size"]);
+$img_type=strtolower(basename($_FILES["co_img"]["type"]));
+
+if($img_size>1000000){
+	$s5 ='الصورة اكبر من 1 قيقا';
+	
+}
+if($img_type !='png'&&$img_type !='jpg'&&$img_type != 'jpeg' && $img_type !=''){
+	$s6 ='الصورة لاتقبل سوى امتداد png وjpg';
+	
+}
+if($s1==""&&$s2==""&&$s3==""&&$s4==""&&$s5==""&&$s6==""){
+ include 'mysql.php';
+
+
+
+
+move_uploaded_file($_FILES["co_img"]["tmp_name"],$file_path); 
+
+
+$co_name=$_POST['co_name'];
+$co_type=$_POST['co_type'];
+$co_place=$_POST['co_place'];
+
+$sql="insert into complaints (co_name,co_type,co_place,co_img) values('$co_name','$co_type','$co_place','$file_path')";
+if(mysqli_query($conn,$sql)){
+    echo "the complain has sent";
+}else{
+    echo "erorr";
+}
+mysqli_close($conn);
+}
+}
+
+
+?>
+
+<form action="projict.php" method="post" enctype="multipart/form-data">
+<label> :عنوان المشكله </label>
+<br><br>
+<?php echo $s1; ?>
+<input type="text" placeholder="عنوان المشكلة" name="co_name">
+
+<br><br>
+<label>:نوع المشكله</label>
+<br><br>
+<input type="radio" name="co_type" value="مبنى">
+<label>مبني</label>
+<input type="radio" name="co_type" value="طرق وشوارع" >
+<label>أناره</label>
+<input type="radio" name="co_type" value="أناره" >
+<label>طرق وشوارع</label>
+<br><br>
+<?php echo $s2; ?>
+<br><br>
+<label>place:</label>
+<select name="co_place">
+   <option value="h">اختر الحي</option>
+<option value="ظهره لبن">ظهره لبن</option>
+<option value="	حي الربيع">	حي الربيع</option>
+<option value="حي الندى">       حي الندى   </option>
+<option value="حي الصحافة">   حي الصحافة</option>
+<option value="   حي النرجس">       حي النرجس</option>
+<option value="	حي الملز">    	حي الملز  </option>
+</select>
+<?php echo $s3; ?>
+<br><br>
+<br><br>
+<label>choose picture:</label>
+<br><br>
+<input type="file" name="co_img">
+<?php echo $s4; ?><br><br><?php echo $s5; ?><?php echo $s6; ?>
+<br><br>
+<input type="submit" name="submit" >
+    </form>
+
+    <br><br>
+
+<a href="home_page.php"><button>  home  </button></a>
+
+</body>
+</html>
+
+
+--------------------------------------------------------
+home page.php
+<html>
+
+<body bgcolor= "coral">
+<?php
+
+ include 'mysql.php';
+$sql="select*from complaints ";
+$query = mysqli_query($conn,$sql);
+echo'<table width="50%" bgcolor="beige" border="1" align="center">';
+echo '<tr><th>complain name</th><th>photo</th><th>details</th><th>delete</th></tr>';
+while ($row = mysqli_fetch_row($query)){
+	
+	echo'<tr align = "center"><td>'.$row[1].'</td><td><img src="'.$row[4].'" width="50" height="50"> </td>';
+ echo '<td><a href="detalis.php?$id='.$row[0].'"><button>details</button></a></td>';
+  echo '<td><a href="delete.php?$id='.$row[0].'"><button>delete</button></a></td></tr>';
+  
+}
+echo '</table>';
+
+
+echo '<a href="projict.php"><button> add complain </button></a>'
+
+?>
+
+
+
+</body>
+</html>
+
+
+
+--------------------------------------------------------------
+mysql.php
+<?php $conn = mysqli_connect("localhost","root","","complaint");
+if ($conn===false){
+ die("error".mysqli_connect_error());
+}
+?>
+--------------------------------------------------
+delete.php
+<?php
+include 'mysql.php';
+$id = $_GET['$id'];
+$sql="delete from complaints where co_num =$id";
+if (mysqli_query($conn,$sql)){
+echo '<script>';
+echo 'alert("complaint successfully Deleted");';
+echo'window.location.href ="home_page.php";';
+echo '</script>';
+//header("location:home_page.php");
+}
+?>
+-------------------------------------------------------------------
+detalis.php
+<?php 
+include 'mysql.php';
+$id =$_GET['$id'];
+$sql = "select * from complaints where co_num=$id";
+$query = mysqli_query($conn,$sql);
+echo '<div align ="center">';
+echo '<table border ="1" width ="30%" bgcolor="beige">';
+$rs = mysqli_fetch_assoc($query);
+echo'<th align="center" bgcolor="red" style="color:white" > All Details </td></th>';
+echo'<tr align="center"><td>'.$rs['co_name'].'</td></tr>';
+echo'<tr align="center"><td>'.$rs['co_type'].'</td></tr>';
+echo'<tr align="center"><td>'.$rs['co_place'].'</td></tr>';
+echo'<tr align="center"><td><img src="'.$rs['co_img'].'" width="40"
+height="40"></tr></td>';
+echo'<tr align="center"><td><a href="home_page.php"><button> Back </button></a></td></tr>
+</table>';
+echo '</div>';
+?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+?>
+
+
